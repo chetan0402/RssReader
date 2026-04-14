@@ -76,16 +76,20 @@ func readFeed(link string) ([]*gofeed.Item, error) {
 			start = i
 			break
 		}
+		slog.Debug("skip", "title", feed.Title)
 	}
 
 	return feed.Items[start:len(feed.Items)], nil
 }
 
 func main() {
-	slog.SetLogLoggerLevel(slog.LevelInfo)
-	if slices.Contains(os.Args, "-v") {
-		slog.SetLogLoggerLevel(slog.LevelDebug)
+	opts := &slog.HandlerOptions{
+		Level: slog.LevelInfo,
 	}
+	if slices.Contains(os.Args, "-v") {
+		opts.Level = slog.LevelDebug
+	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, opts)))
 	scanner := bufio.NewScanner(os.Stdin)
 	bc, err := os.ReadFile(getConfigHUMLPath())
 	if err != nil {
