@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"slices"
@@ -70,49 +70,58 @@ func readFeed(link string) ([]*gofeed.Item, error) {
 	}
 	sort.Sort(feed)
 
-	end := len(feed.Items)
+	start := len(feed.Items)
 	for i, v := range feed.Items {
-		if v.PublishedParsed.Unix() <= lastRead[link] {
-			end = i
+		if v.PublishedParsed.Unix() > lastRead[link] {
+			start = i
 			break
 		}
 	}
 
-	return feed.Items[0:end], nil
+	return feed.Items[start:len(feed.Items)], nil
 }
 
 func main() {
+	slog.SetLogLoggerLevel(slog.LevelInfo)
+	if slices.Contains(os.Args, "-v") {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	}
 	scanner := bufio.NewScanner(os.Stdin)
 	bc, err := os.ReadFile(getConfigHUMLPath())
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("err", "err", err)
+		os.Exit(1)
 	}
 	var config Config
 	if err := huml.Unmarshal(bc, &config); err != nil {
-		log.Fatal(err)
+		slog.Error("err", "err", err)
+		os.Exit(1)
 	}
 	if _, err := os.Stat(getLastReadHUMLPath()); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			lastRead = make(map[string]int64)
 			if err := saveLastRead(); err != nil {
-				log.Fatal(err)
+				slog.Error("savefailed", "err", err)
+				os.Exit(1)
 			}
 		}
 	}
 	blr, err := os.ReadFile(getLastReadHUMLPath())
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("err", "err", err)
+		os.Exit(1)
 	}
 	if err := huml.Unmarshal(blr, &lastRead); err != nil {
-		log.Fatal(err)
+		slog.Error("err", "err", err)
+		os.Exit(1)
 	}
-	log.Println(config)
+	slog.Debug("load", "config", config)
 	if slices.Contains(os.Args, "bg") {
 		for _, v := range config.Rss {
 			if v.Important == Important {
 				items, err := readFeed(v.Link)
 				if err != nil {
-					log.Println(err)
+					slog.Error("fetch", "err", err)
 					continue
 				}
 				exec.Command("notify-send", "RSS", fmt.Sprintf("%v articles from %v", len(items), v.Link))
@@ -123,7 +132,7 @@ func main() {
 	for _, v := range config.Rss {
 		items, err := readFeed(v.Link)
 		if err != nil {
-			fmt.Println(err)
+			slog.Error("err", "err", err)
 			continue
 		}
 		for _, item := range items {
@@ -131,7 +140,7 @@ func main() {
 			fmt.Println(item.Link)
 			scanner.Scan()
 			if err := markRead(v.Link, *item.PublishedParsed); err != nil {
-				log.Fatal(err)
+				slog.Error("err", "err", err)
 			}
 		}
 	}
