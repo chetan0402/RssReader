@@ -11,6 +11,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/huml-lang/go-huml"
 	"github.com/mmcdole/gofeed"
 )
@@ -141,7 +142,9 @@ func main() {
 		}
 		for _, item := range items {
 			fmt.Println(item.Title)
+			color.Set(color.FgHiBlack)
 			fmt.Println(item.Link)
+			color.Unset()
 			scanner.Scan()
 			if err := markRead(v.Link, *item.PublishedParsed); err != nil {
 				slog.Error("err", "err", err)
