@@ -3,6 +3,7 @@ module github.com/chetan0402/rssreader
 go 1.26.2
 
 require (
+	github.com/fatih/color v1.19.0
 	github.com/huml-lang/go-huml v0.3.0
 	github.com/mmcdole/gofeed v1.3.0
 )
@@ -10,7 +11,6 @@ require (
 require (
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
-	github.com/fatih/color v1.19.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
