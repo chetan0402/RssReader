@@ -16,9 +16,6 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-const LASTREADHUML = "$HOME/.local/share/lastread.huml"
-const CONFIGHUML = "$HOME/.config/rssreader.huml"
-
 const (
 	Important = iota
 	Normal
@@ -34,14 +31,6 @@ type Config struct {
 
 var lastRead map[string]int64
 var fp = gofeed.NewParser()
-
-func getLastReadHUMLPath() string {
-	return os.ExpandEnv(LASTREADHUML)
-}
-
-func getConfigHUMLPath() string {
-	return os.ExpandEnv(CONFIGHUML)
-}
 
 func saveLastRead() error {
 	blr, err := huml.Marshal(lastRead)
