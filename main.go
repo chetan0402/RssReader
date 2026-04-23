@@ -72,12 +72,14 @@ func main() {
 	if slices.Contains(os.Args, "bg") {
 		for _, v := range config.Rss {
 			if v.Important == Important {
-				items, err := readFeed(lr, v.Link)
+				_, err := readFeed(lr, v.Link)
 				if err != nil {
 					slog.Error("fetch", "err", err)
 					continue
 				}
-				exec.Command("notify-send", "RSS", fmt.Sprintf("%v articles from %v", len(items), v.Link))
+				if err := exec.Command("notify-send", "RSS", fmt.Sprintf("Articles from %v", v.Link)).Run(); err != nil {
+					slog.Error("notify", "err", err)
+				}
 			}
 		}
 		os.Exit(0)
