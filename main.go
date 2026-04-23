@@ -38,7 +38,7 @@ func readFeed(lr *lastRead, link string) ([]*gofeed.Item, error) {
 
 	start := len(feed.Items)
 	for i, v := range feed.Items {
-		if lr.isRead(link, v.PublishedParsed) {
+		if !lr.isRead(link, v.PublishedParsed) {
 			start = i
 			break
 		}
