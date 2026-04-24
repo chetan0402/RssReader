@@ -64,5 +64,5 @@ func (l *lastRead) markRead(link string, t time.Time) error {
 }
 
 func (l *lastRead) isRead(link string, t *time.Time) bool {
-	return t.Unix() < l.mp[link]
+	return t.Unix() <= l.mp[link]
 }
